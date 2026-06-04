@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Model Viewer</title>
+    <title>AI Smart Detector</title>
     
-    <!-- Подключаем шрифт Inter для современного вида -->
+    <!-- Подключаем шрифт Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --bg-color: #0f172a;
             --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
             --text-color: #f8fafc;
             --card-bg: rgba(30, 41, 59, 0.7);
             --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
@@ -22,7 +23,6 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
-            /* Красивый градиентный фон */
             background-image: 
                 radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
                 radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
@@ -36,11 +36,9 @@
             overflow-x: hidden;
         }
 
-        /* Контейнер приложения (Карточка) */
         .app-container {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
             padding: 40px;
@@ -50,12 +48,20 @@
             flex-direction: column;
             align-items: center;
             box-shadow: var(--shadow);
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        /* Эффект при активации действия */
+        .app-container.action-triggered {
+            box-shadow: 0 0 40px var(--accent-color);
+            border-color: var(--accent-color);
+            transform: scale(1.02);
         }
 
         h1 {
             font-weight: 800;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
             font-size: 1.8rem;
             letter-spacing: -0.5px;
@@ -64,47 +70,76 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* Стили кнопки */
+        .controls-area {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         .start-btn {
             background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
             border: none;
             border-radius: 12px;
-            padding: 16px 48px;
+            padding: 16px 32px;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
             outline: none;
+            flex-grow: 1;
         }
 
         .start-btn:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+            transform: translateY(-2px) scale(1.02);
         }
 
-        .start-btn:active {
-            transform: translateY(1px);
+        /* Стиль кнопки загрузки файла */
+        .file-upload-label {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-grow: 1;
         }
 
-        /* Обертка для видео (скрывает острые углы канваса) */
+        .file-upload-label:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        /* Скрываем стандартный инпут файла */
+        #imageInput {
+            display: none;
+        }
+
         .video-wrapper {
             border-radius: 20px;
             overflow: hidden;
             position: relative;
-            width: 200px; /* Фиксируем размер контейнера под скрипт */
+            width: 200px;
             height: 200px;
             background: #000;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            margin-bottom: 30px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 30px;
         }
 
-        /* Стили для результатов */
         #label-container {
             display: flex;
             flex-direction: column;
@@ -112,114 +147,215 @@
             width: 100%;
         }
 
-        /* Стилизация динамически добавляемых div внутри label-container */
         #label-container div {
             background: rgba(255, 255, 255, 0.05);
             padding: 12px 20px;
             border-radius: 12px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             color: #cbd5e1;
             border-left: 4px solid var(--accent-color);
             text-align: center;
+            opacity: 0; /* Скрыто до начала работы */
+            transition: opacity 0.5s ease, transform 0.3s ease;
         }
         
-        /* Если нужно сделать текст еще крупнее, можно раскомментировать следующее:
-        #label-container div span {
-            font-size: 1.5em;
-            color: #fff;
-        } */
+        #label-container div.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
 
+        /* Специфичные стили для разных вероятностей */
+        #label-container div.high-prob {
+            background: rgba(16, 185, 129, 0.2); /* Зеленый фон */
+            color: #ffffff;
+            border-left-color: var(--success-color);
+            font-size: 1.3rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <h1>Machine Learning Vision</h1>
+<div class="app-container" id="appContainer">
+    <h1>AI Vision System</h1>
     
-    <button type="button" onclick="init()" class="start-btn">Start System</button>
+    <div class="controls-area">
+        <button type="button" onclick="startSystem()" id="startBtn" class="start-btn">Start Camera</button>
+        
+        <label for="imageInput" class="file-upload-label">
+            Загрузить фото
+        </label>
+        <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+    </div>
     
     <div class="video-wrapper">
         <div id="webcam-container"></div>
     </div>
     
-    <div id="label-container"></div>
+    <div id="label-container">
+        <!-- Результаты появятся здесь -->
+    </div>
 </div>
 
-<!-- Библиотеки (как в оригинале) -->
+<!-- Библиотеки TensorFlow и Teachable Machine -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
 <script type="text/javascript">
-    // More API functions here:
-    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
-
-    // the link to your model provided by Teachable Machine export panel
+    // Ссылка на вашу модель
     const URL = "https://teachablemachine.withgoogle.com/models/es-9w7uTa/";
 
     let model, webcam, labelContainer, maxPredictions;
+    let isWebcamRunning = false;
+    let animationId = null;
 
-    // Load the image model and setup the webcam
-    async function init() {
-        const btn = document.querySelector('.start-btn');
-        btn.style.opacity = "0.5";
+    // Инициализация системы
+    async function startSystem() {
+        const btn = document.getElementById("startBtn");
+        
+        if (isWebcamRunning) {
+            // Если уже запущено, то останавливаем (по желанию можно добавить такую функцию)
+            return; 
+        }
+
         btn.textContent = "Loading AI...";
+        btn.style.opacity = "0.5";
 
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
 
-        // load the model and metadata
         try {
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
 
-            // Convenience function to setup a webcam
-            const flip = true; // whether to flip the webcam
-            webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+            // Настройка веб-камеры
+            const flip = true; 
+            webcam = new tmImage.Webcam(200, 200, flip);
             
-            // Небольшая задержка, чтобы интерфейс успел обновиться
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 200)); // Пауза для рендеринга
             
-            await webcam.setup(); // request access to the webcam
+            await webcam.setup();
             await webcam.play();
+            
+            isWebcamRunning = true;
             window.requestAnimationFrame(loop);
 
-            // append elements to the DOM
             document.getElementById("webcam-container").appendChild(webcam.canvas);
             labelContainer = document.getElementById("label-container");
-            for (let i = 0; i < maxPredictions; i++) { // and class labels
-                labelContainer.appendChild(document.createElement("div"));
-            }
             
-            btn.textContent = "System Active";
-            btn.style.background = "#10b981"; // Зеленый цвет активности
+            // Очищаем старые лейблы если были
+            labelContainer.innerHTML = ''; 
+            
+            for (let i = 0; i < maxPredictions; i++) {
+                const div = document.createElement("div");
+                div.className = "";
+                labelContainer.appendChild(div);
+            }
+
+            btn.textContent = "Running...";
+            btn.style.background = "#10b981"; // Зеленый
+            
         } catch (error) {
             console.error(error);
-            btn.textContent = "Error Loading";
+            alert("Ошибка загрузки модели. Проверьте консоль.");
+            btn.textContent = "Error";
         }
     }
 
-    async function loop() {
-        webcam.update(); // update the webcam frame
-        await predict();
-        window.requestAnimationFrame(loop);
+    // Основной цикл обработки видео
+    async function loop(timestamp) {
+        if (!isWebcamRunning) return;
+        
+        webcam.update(); // Обновляем кадр
+        
+        // Запускаем предсказание на основе веб-камеры
+        await runPrediction(webcam.canvas);
+        
+        animationId = window.requestAnimationFrame(loop);
     }
 
-    // run the webcam image through the image model
-    async function predict() {
-        // predict can take in an image, video or canvas html element
-        const prediction = await model.predict(webcam.canvas);
+    // Универсальная функция предсказания (работает и для камеры, и для картинки)
+    async function runPrediction(source) {
+        const prediction = await model.predict(source);
+        
         for (let i = 0; i < maxPredictions; i++) {
             const classPrediction =
-                prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(0) + "%";
-            labelContainer.childNodes[i].innerHTML = classPrediction;
+                prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(1) + "%";
             
-            // Визуальное выделение самой вероятной категории
-            labelContainer.childNodes[i].style.borderLeftWidth = prediction[i].probability > 0.8 ? "6px" : "4px";
-            labelContainer.childNodes[i].style.color = prediction[i].probability > 0.8 ? "#fff" : "#cbd5e1";
+            const labelDiv = labelContainer.childNodes[i];
+            if (labelDiv) {
+                labelDiv.innerText = classPrediction;
+                labelDiv.classList.add("active");
+                
+                // Визуализация высокой вероятности
+                if (prediction[i].probability > 0.85) {
+                    labelDiv.classList.add("high-prob");
+                    
+                    // ==========================================
+                    // ЗДЕСЬ ЗАПУСКАЮТСЯ ДЕЙСТВИЯ ПРИ РАСПОЗНАВАНИИ
+                    // ==========================================
+                    if (prediction[i].probability > 0.90) {
+                         triggerAction(prediction[i].className);
+                    }
+                } else {
+                    labelDiv.classList.remove("high-prob");
+                }
+            }
         }
+    }
+
+    // --- ФУНКЦИЯ ДЕЙСТВИЙ (ТО, О ЧЕМ ВЫ СПРАШИВАЛИ) ---
+    function triggerAction(className) {
+        console.log("Обнаружен класс:", className);
+        
+        // Пример 1: Визуальный эффект на самом контейнере
+        const container = document.getElementById("appContainer");
+        container.classList.add("action-triggered");
+        setTimeout(() => container.classList.remove("action-triggered"), 200);
+
+        // Пример 2: Логика по конкретным именам классов
+        // Замените "Ваш Класс" на реальные имена из вашей модели
+        if (className === "Левая рука") {
+             console.log("Действие: Левая рука поднята!");
+             // Например: document.documentElement.style.setProperty('--accent-color', '#ff0000');
+        } else if (className === "Правая рука") {
+             console.log("Действие: Правая рука поднята!");
+        }
+        
+        // Здесь можно добавить отправку данных на сервер, управление роботом и т.д.
+    }
+
+    // --- ОБРАБОТКА ЗАГРУЗКИ ИЗОБРАЖЕНИЙ ---
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        
+        reader.onload = async function(e) {
+            // Создаем элемент Image
+            const img = new Image();
+            img.src = e.target.result;
+            
+            // Ждем пока картинка загрузится в память браузера
+            await img.decode().then(async () => {
+                
+                // Пауза для камере, чтобы не было конфликтов с анимацией
+                if (isWebcamRunning) {
+                   window.cancelAnimationFrame(animationId);
+                   await webcam.stop();
+                   isWebcamRunning = false;
+                   document.getElementById("startBtn").textContent = "Resume Camera";
+                   document.getElementById("startBtn").style.background = "var(--accent-color)";
+                   document.getElementById("startBtn").style.opacity = "1";
+                }
+
+                // Предсказание загруженной картинки
+                await runPrediction(img);
+            }).catch(err => console.error("Ошибка декодирования изображения:", err));
+        };
+
+        reader.readAsDataURL(file);
     }
 </script>
 
