@@ -1,363 +1,625 @@
+
+Gemini
+New chat
+Search chats
+Videos
+Library
+Gems
+New notebook
+presentation
+Vibecoding and the Art of AI Prompt Engineering
+All notebooks
+Hi Mochi
+Превращение кода Teachable Machine в приложение
+Идеи проектов для курса ИИ
+Scratch-игра: Электромагниты и Лабиринт
+План занятий по Python и ИИ для 6 класса
+Урок "Нейросети-художники" для детей
+Генетическая лаборатория: часовая игра
+Световые иллюзии и маскировка в Figma
+Проект Пакмана с ИИ для детей
+Идеи проектов Scratch с физикой
+Создание презентации о Unity
+Создание презентации по физике игр
+Cat sitting on a sofa realistic photo disposable camera unfiltered shot with an iPhone
+Cat sitting on a sofa realistic photo
+Как LLM подбирают слова: симулятор
+Я установила orange data mining но когда я доьавляю аддоны ничего не добавляется я не с аккаунта администратора
+Excel-суперсилы для школьников: Урок
+Dream Interpretation: Transformation and Hidden Truths
+Random California Address Generation
+Formatting Hermes Cronjob Responses
+Оформление опыта репетитора
+Orange Data Mining: Анализ тональности текста
+Создание презентации о качестве данных
+Corgi Birthday Animation Request
+Corgi Birthday Animation Generation
+Integrating Claude with Hermes Agent
+Obsidian Vault Organization for AI Collaboration
+Game Character Gets Cursor Help
+Pixel Character Leaps Into Reality
+Video Prompts For Game Development Course
+Game Engine Pixel Art Animation
+Перевод и адаптация рабочего листа
+Перевод инструкции по машинному обучению
+Generating Knight's Game Animation
+Pixel Art Platformer Gameplay Video
+
+Activity
+Frankfurt am Main, Germany
+From your IP address
+Update location
+Conversation with Gemini
+Вот рабочий базовый код от Teachable Machine для моего проекта:
+
+
+
+<div>Teachable Machine Image Model</div>
+
+<button type="button" onclick="init()">Start</button>
+
+<div id="webcam-container"></div>
+
+<div id="label-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+<script type="text/javascript">
+
+// More API functions here:
+
+// https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+
+
+
+// the link to your model provided by Teachable Machine export panel
+
+const URL = "https://teachablemachine.withgoogle.com/models/es-9w7uTa/";
+
+
+
+let model, webcam, labelContainer, maxPredictions;
+
+
+
+// Load the image model and setup the webcam
+
+async function init() {
+
+const modelURL = URL + "model.json";
+
+const metadataURL = URL + "metadata.json";
+
+
+
+// load the model and metadata
+
+// Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+
+// or files from your local hard drive
+
+// Note: the pose library adds "tmImage" object to your window (window.tmImage)
+
+model = await tmImage.load(modelURL, metadataURL);
+
+maxPredictions = model.getTotalClasses();
+
+
+
+// Convenience function to setup a webcam
+
+const flip = true; // whether to flip the webcam
+
+webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+
+await webcam.setup(); // request access to the webcam
+
+await webcam.play();
+
+window.requestAnimationFrame(loop);
+
+
+
+// append elements to the DOM
+
+document.getElementById("webcam-container").appendChild(webcam.canvas);
+
+labelContainer = document.getElementById("label-container");
+
+for (let i = 0; i < maxPredictions; i++) { // and class labels
+
+labelContainer.appendChild(document.createElement("div"));
+
+}
+
+}
+
+
+
+async function loop() {
+
+webcam.update(); // update the webcam frame
+
+await predict();
+
+window.requestAnimationFrame(loop);
+
+}
+
+
+
+// run the webcam image through the image model
+
+async function predict() {
+
+// predict can take in an image, video or canvas html element
+
+const prediction = await model.predict(webcam.canvas);
+
+for (let i = 0; i < maxPredictions; i++) {
+
+const classPrediction =
+
+prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+
+labelContainer.childNodes[i].innerHTML = classPrediction;
+
+}
+
+}
+
+</script>
+
+
+
+
+
+Пожалуйста, используй этот код как основу. Оставь всю логику работы с камерой и моделью без изменений, но преврати это в стильное веб-приложение в одном файле index.html.
+
+
+
+Требования к дизайну:
+
+
+
+Сделай темную тему с красивым фоном.
+
+
+
+Расположи окно веб-камеры по центру экрана и сделай ему закругленные углы.
+
+
+
+Сделай так, чтобы результаты (классы и проценты уверенности) выводились крупным, красивым шрифтом под видео.
+
+
+
+Кнопку 'Start' сделай большой, яркой и расположи под текстом
+
+
+
+Добавь что если распознается class 1 то включается конфетти и голос говорит класс 1
+
+если голос два то просто вокруг эмоджи котиков
+
+скинь мне html код
+
+Ваш HTML файл готов
+HTML icon
+ index 
+ HTML 
+
+Я переработал ваш базовый скрипт Teachable Machine в полноценное стильное веб-приложение в одном файле.
+
+Что было сделано:
+
+Дизайн и Тема: Применена красивая тёмная тема с легким радиальным градиентом на фоне. Основной блок имеет эффект матового стекла (glassmorphism).
+
+Веб-камера: Окно камеры отцентрировано, имеет закруглённые углы (радиус 24px), красивую обводку и аккуратную тень. Также добавлено отзеркаливание видео по горизонтали — так намного удобнее смотреться в камеру.
+
+Результаты предсказаний: Вместо мелкого текста вероятности выводятся крупным шрифтом (используется современный шрифт Inter). Строки сделаны в виде аккуратных карточек. Если вероятность класса превышает 80%, эта карточка красиво подсвечивается.
+
+Кнопка 'Start': Кнопка стала крупной, имеет яркий неоновый градиент, эффекты при наведении и нажатии, и расположена прямо под результатами.
+
+Интерактивные условия:
+
+Класс 1 (Class 1): Как только модель уверенно распознаёт этот класс (индекс 0), срабатывает салют из конфетти, и браузерный синтезатор речи произносит «Класс один». Встроена защита от спама звуками, поэтому голос не будет повторяться чаще раза в 3 секунды.
+
+Голос два (Class 2): При распознавании этого класса (индекс 1) вокруг веб-камеры динамически генерируются разлетающиеся в разные стороны эмодзи котиков (🐱) с плавной CSS-анимацией.
+
+Вы можете просто открыть скачанный файл index.html в любом современном браузере. Убедитесь, что у вас включен звук на компьютере для проверки озвучивания первого класса!
+
+
+
+
+Gemini is AI and can make mistakes, including about people. Your privacy and GeminiOpens in a new window
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Smart Detector</title>
-    
-    <!-- Подключаем шрифт Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
+    <title>Teachable Machine - Интеллектуальное Распознавание</title>
+    <!-- Подключаем красивый современный шрифт Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --accent-color: #3b82f6;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-            --text-color: #f8fafc;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
             font-family: 'Inter', sans-serif;
-            color: var(--text-color);
+            background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+            color: #f8fafc;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             overflow-x: hidden;
+            padding: 20px;
         }
 
         .app-container {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
+            border-radius: 28px;
             padding: 40px;
-            width: 90%;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        /* Эффект при активации действия */
-        .app-container.action-triggered {
-            box-shadow: 0 0 40px var(--accent-color);
-            border-color: var(--accent-color);
-            transform: scale(1.02);
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+                        0 0 40px rgba(99, 102, 241, 0.1);
         }
 
         h1 {
-            font-weight: 800;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 1.8rem;
-            letter-spacing: -0.5px;
-            background: linear-gradient(to right, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .controls-area {
-            width: 100%;
-            display: flex;
-            gap: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #818cf8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             margin-bottom: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
         }
 
-        .start-btn {
-            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
-            border: none;
-            border-radius: 12px;
-            padding: 16px 32px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-            outline: none;
-            flex-grow: 1;
-        }
-
-        .start-btn:hover {
-            transform: translateY(-2px) scale(1.02);
-        }
-
-        /* Стиль кнопки загрузки файла */
-        .file-upload-label {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 16px 20px;
-            color: #cbd5e1;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            flex-grow: 1;
-        }
-
-        .file-upload-label:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-
-        /* Скрываем стандартный инпут файла */
-        #imageInput {
-            display: none;
-        }
-
-        .video-wrapper {
-            border-radius: 20px;
-            overflow: hidden;
+        /* Контейнер веб-камеры по центру, с закругленными углами */
+        #webcam-container {
             position: relative;
-            width: 200px;
-            height: 200px;
-            background: #000;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 35px auto;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), 
+                        0 20px 30px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            background: #020617;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
+        #webcam-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            transform: scaleX(-1); /* Зеркальное отображение для удобства */
+        }
+
+        /* Крупный красивый шрифт для результатов под видео */
         #label-container {
+            margin-bottom: 35px;
             display: flex;
             flex-direction: column;
             gap: 12px;
+        }
+
+        .prediction-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .prediction-item.active {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+            border-color: rgba(129, 140, 248, 0.4);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.15);
+            transform: scale(1.02);
+        }
+
+        .class-label {
+            font-size: 18px;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-align: left;
+        }
+
+        .prediction-item.active .class-label {
+            color: #ffffff;
+        }
+
+        .class-prob {
+            font-size: 22px;
+            font-weight: 900;
+            color: #94a3b8;
+        }
+
+        .prediction-item.active .class-prob {
+            color: #34d399;
+            text-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+        }
+
+        /* Большая яркая кнопка Start под текстом */
+        .btn-start {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: #ffffff;
+            border: none;
+            padding: 18px 48px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.5), 
+                        inset 0 -4px 0px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
             width: 100%;
         }
 
-        #label-container div {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #cbd5e1;
-            border-left: 4px solid var(--accent-color);
-            text-align: center;
-            opacity: 0; /* Скрыто до начала работы */
-            transition: opacity 0.5s ease, transform 0.3s ease;
-        }
-        
-        #label-container div.active {
-            opacity: 1;
-            transform: translateX(0);
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.7), 
+                        inset 0 -4px 0px rgba(0, 0, 0, 0.2);
+            filter: brightness(1.1);
         }
 
-        /* Специфичные стили для разных вероятностей */
-        #label-container div.high-prob {
-            background: rgba(16, 185, 129, 0.2); /* Зеленый фон */
-            color: #ffffff;
-            border-left-color: var(--success-color);
-            font-size: 1.3rem;
+        .btn-start:active {
+            transform: translateY(1px);
+            box-shadow: 0 5px 10px -5px rgba(79, 70, 229, 0.5);
+        }
+
+        /* Стили для летающих котиков */
+        .cat-emoji {
+            position: fixed;
+            font-size: 36px;
+            pointer-events: none;
+            z-index: 9999;
+            animation: floatAway 1.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes floatAway {
+            0% {
+                transform: translate(-50%, -50%) scale(0.3);
+                opacity: 0;
+            }
+            15% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.4) rotate(var(--rot));
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="app-container" id="appContainer">
-    <h1>AI Vision System</h1>
-    
-    <div class="controls-area">
-        <button type="button" onclick="startSystem()" id="startBtn" class="start-btn">Start Camera</button>
+    <div class="app-container">
+        <h1>Teachable Machine Image Model</h1>
         
-        <label for="imageInput" class="file-upload-label">
-            Загрузить фото
-        </label>
-        <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
-    </div>
-    
-    <div class="video-wrapper">
+        <!-- Окно веб-камеры -->
         <div id="webcam-container"></div>
-    </div>
-    
-    <div id="label-container">
-        <!-- Результаты появятся здесь -->
-    </div>
-</div>
-
-<!-- Библиотеки TensorFlow и Teachable Machine -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-
-<script type="text/javascript">
-    // Ссылка на вашу модель
-    const URL = "https://teachablemachine.withgoogle.com/models/es-9w7uTa/";
-
-    let model, webcam, labelContainer, maxPredictions;
-    let isWebcamRunning = false;
-    let animationId = null;
-
-    // Инициализация системы
-    async function startSystem() {
-        const btn = document.getElementById("startBtn");
         
-        if (isWebcamRunning) {
-            // Если уже запущено, то останавливаем (по желанию можно добавить такую функцию)
-            return; 
-        }
+        <!-- Контейнер результатов (крупный шрифт) -->
+        <div id="label-container"></div>
+        
+        <!-- Кнопка 'Start' в самом низу под текстом -->
+        <button class="btn-start" type="button" onclick="init()">Start</button>
+    </div>
 
-        btn.textContent = "Loading AI...";
-        btn.style.opacity = "0.5";
+    <!-- Подключаем оригинальные скрипты TensorFlow и Teachable Machine -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    
+    <!-- Дополнительно подключаем легковесную библиотеку конфетти через CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
-        const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
+    <script type="text/javascript">
+        // Ссылка на вашу модель из панели Teachable Machine
+        const URL = "https://teachablemachine.withgoogle.com/models/es-9w7uTa/";
 
-        try {
+        let model, webcam, labelContainer, maxPredictions;
+        
+        // Переменные контроля состояний для анимации и голоса
+        let activeEffect = null; 
+        let lastSpokenTime = 0;
+        let catInterval = null;
+
+        // Инициализация модели и камеры
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
             model = await tmImage.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
 
-            // Настройка веб-камеры
             const flip = true; 
-            webcam = new tmImage.Webcam(200, 200, flip);
-            
-            await new Promise(resolve => setTimeout(resolve, 200)); // Пауза для рендеринга
-            
-            await webcam.setup();
+            webcam = new tmImage.Webcam(200, 200, flip); 
+            await webcam.setup(); 
             await webcam.play();
-            
-            isWebcamRunning = true;
             window.requestAnimationFrame(loop);
 
+            // Добавляем канвас в стилизованный контейнер DOM
             document.getElementById("webcam-container").appendChild(webcam.canvas);
             labelContainer = document.getElementById("label-container");
             
-            // Очищаем старые лейблы если были
-            labelContainer.innerHTML = ''; 
-            
+            // Создаем кастомную разметку под каждый класс для красивого отображения
             for (let i = 0; i < maxPredictions; i++) {
-                const div = document.createElement("div");
-                div.className = "";
-                labelContainer.appendChild(div);
+                const item = document.createElement("div");
+                item.className = "prediction-item";
+                item.innerHTML = `
+                    <span class="class-label">Ожидание...</span>
+                    <span class="class-prob">0%</span>
+                `;
+                labelContainer.appendChild(item);
+            }
+            
+            // Скрываем кнопку после успешной активации (опционально, для красоты)
+            document.querySelector('.btn-start').style.display = 'none';
+        }
+
+        async function loop() {
+            webcam.update(); 
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        // Обработка предсказаний нейросети
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            
+            let highestProb = 0;
+            let highestIndex = -1;
+
+            for (let i = 0; i < maxPredictions; i++) {
+                const prob = prediction[i].probability;
+                const percent = (prob * 100).toFixed(0) + "%";
+                
+                // Находим элемент строки
+                const item = labelContainer.childNodes[i];
+                if (item) {
+                    item.innerHTML = `
+                        <span class="class-label">${prediction[i].className}</span>
+                        <span class="class-prob">${percent}</span>
+                    `;
+                }
+
+                // Ищем доминирующий класс с максимальной уверенностью
+                if (prob > highestProb) {
+                    highestProb = prob;
+                    highestIndex = i;
+                }
             }
 
-            btn.textContent = "Running...";
-            btn.style.background = "#10b981"; // Зеленый
-            
-        } catch (error) {
-            console.error(error);
-            alert("Ошибка загрузки модели. Проверьте консоль.");
-            btn.textContent = "Error";
-        }
-    }
+            // Логика визуальных и звуковых эффектов (порог уверенности > 80%)
+            if (highestProb > 0.80) {
+                // Подсвечиваем активную карточку класса
+                for (let i = 0; i < maxPredictions; i++) {
+                    if (i === highestIndex) {
+                        labelContainer.childNodes[i].classList.add('active');
+                    } else {
+                        labelContainer.childNodes[i].classList.remove('active');
+                    }
+                }
 
-    // Основной цикл обработки видео
-    async function loop(timestamp) {
-        if (!isWebcamRunning) return;
-        
-        webcam.update(); // Обновляем кадр
-        
-        // Запускаем предсказание на основе веб-камеры
-        await runPrediction(webcam.canvas);
-        
-        animationId = window.requestAnimationFrame(loop);
-    }
-
-    // Универсальная функция предсказания (работает и для камеры, и для картинки)
-    async function runPrediction(source) {
-        const prediction = await model.predict(source);
-        
-        for (let i = 0; i < maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(1) + "%";
-            
-            const labelDiv = labelContainer.childNodes[i];
-            if (labelDiv) {
-                labelDiv.innerText = classPrediction;
-                labelDiv.classList.add("active");
-                
-                // Визуализация высокой вероятности
-                if (prediction[i].probability > 0.85) {
-                    labelDiv.classList.add("high-prob");
-                    
-                    // ==========================================
-                    // ЗДЕСЬ ЗАПУСКАЮТСЯ ДЕЙСТВИЯ ПРИ РАСПОЗНАВАНИИ
-                    // ==========================================
-                    if (prediction[i].probability > 0.90) {
-                         triggerAction(prediction[i].className);
+                // Индекс 0 = Класс 1 (Конфетти + Голос)
+                if (highestIndex === 0) {
+                    if (activeEffect !== 'class1') {
+                        activeEffect = 'class1';
+                        stopCats();
+                        triggerConfettiLoop();
+                        speakVoice("Класс один");
+                    }
+                } 
+                // Индекс 1 = Класс 2 (Эмодзи котиков вокруг камеры)
+                else if (highestIndex === 1) {
+                    if (activeEffect !== 'class2') {
+                        activeEffect = 'class2';
+                        startCats();
                     }
                 } else {
-                    labelDiv.classList.remove("high-prob");
+                    resetEffects();
                 }
+            } else {
+                // Если уверенность модели слабая, убираем эффекты и подсветки
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.childNodes[i].classList.remove('active');
+                }
+                resetEffects();
             }
         }
-    }
 
-    // --- ФУНКЦИЯ ДЕЙСТВИЙ (ТО, О ЧЕМ ВЫ СПРАШИВАЛИ) ---
-    function triggerAction(className) {
-        console.log("Обнаружен класс:", className);
-        
-        // Пример 1: Визуальный эффект на самом контейнере
-        const container = document.getElementById("appContainer");
-        container.classList.add("action-triggered");
-        setTimeout(() => container.classList.remove("action-triggered"), 200);
-
-        // Пример 2: Логика по конкретным именам классов
-        // Замените "Ваш Класс" на реальные имена из вашей модели
-        if (className === "Левая рука") {
-             console.log("Действие: Левая рука поднята!");
-             // Например: document.documentElement.style.setProperty('--accent-color', '#ff0000');
-        } else if (className === "Правая рука") {
-             console.log("Действие: Правая рука поднята!");
+        // Функция воспроизведения голоса (синтез речи браузера)
+        function speakVoice(text) {
+            const now = Date.now();
+            // Защита от спама звуками (не чаще раза в 3 секунды для одного класса)
+            if (now - lastSpokenTime > 3000) {
+                window.speechSynthesis.cancel(); // сбрасываем предыдущую очередь
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ru-RU';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+                lastSpokenTime = now;
+            }
         }
-        
-        // Здесь можно добавить отправку данных на сервер, управление роботом и т.д.
-    }
 
-    // --- ОБРАБОТКА ЗАГРУЗКИ ИЗОБРАЖЕНИЙ ---
-    function handleImageUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+        // Функция запуска взрыва конфетти
+        function triggerConfettiLoop() {
+            confetti({
+                particleCount: 120,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
 
-        const reader = new FileReader();
-        
-        reader.onload = async function(e) {
-            // Создаем элемент Image
-            const img = new Image();
-            img.src = e.target.result;
+        // Функция генерации летающих котиков вокруг камеры
+        function startCats() {
+            if (catInterval) return;
+            const camContainer = document.getElementById('webcam-container');
             
-            // Ждем пока картинка загрузится в память браузера
-            await img.decode().then(async () => {
+            catInterval = setInterval(() => {
+                const emoji = document.createElement('div');
+                emoji.className = 'cat-emoji';
+                emoji.innerText = '🐱';
+
+                // Определяем координаты центра веб-камеры
+                const rect = camContainer.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                emoji.style.left = `${centerX}px`;
+                emoji.style.top = `${centerY}px`;
+
+                // Случайный разлет в стороны
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 120 + Math.random() * 100;
+                const dx = Math.cos(angle) * distance + 'px';
+                const dy = Math.sin(angle) * distance + 'px';
+                const rot = (Math.random() * 360) + 'deg';
+
+                emoji.style.setProperty('--dx', dx);
+                emoji.style.setProperty('--dy', dy);
+                emoji.style.setProperty('--rot', rot);
+
+                document.body.appendChild(emoji);
                 
-                // Пауза для камере, чтобы не было конфликтов с анимацией
-                if (isWebcamRunning) {
-                   window.cancelAnimationFrame(animationId);
-                   await webcam.stop();
-                   isWebcamRunning = false;
-                   document.getElementById("startBtn").textContent = "Resume Camera";
-                   document.getElementById("startBtn").style.background = "var(--accent-color)";
-                   document.getElementById("startBtn").style.opacity = "1";
-                }
+                // Удаляем элемент после завершения анимации
+                setTimeout(() => emoji.remove(), 1500);
+            }, 150);
+        }
 
-                // Предсказание загруженной картинки
-                await runPrediction(img);
-            }).catch(err => console.error("Ошибка декодирования изображения:", err));
-        };
+        function stopCats() {
+            if (catInterval) {
+                clearInterval(catInterval);
+                catInterval = null;
+            }
+        }
 
-        reader.readAsDataURL(file);
-    }
-</script>
-
+        function resetEffects() {
+            activeEffect = null;
+            stopCats();
+        }
+    </script>
 </body>
 </html>
+index.html
+Displaying index.html.
