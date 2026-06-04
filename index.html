@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Классификатор</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #6366f1; /* Indigo */
+            --accent-hover: #4f46e5;
+            --bar-bg: #334155;
+            --radius: 20px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            position: relative;
+        }
+
+        .video-wrapper {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background: #000;
+            border-radius: calc(var(--radius) / 1.5);
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .video-wrapper.active {
+            border-color: var(--accent-color);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Зеркальное отображение для удобства пользователя */
+        }
+
+        .placeholder-text {
+            position: absolute;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        h1.prediction-title {
+            font-size: 1.8rem;
+            margin: 0 0 0.5rem 0;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            min-height: 2.5rem;
+            color: var(--text-primary);
+        }
+
+        p.confidence-label {
+            margin: 0 0 1rem 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: var(--bar-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-color), #818cf8);
+            border-radius: 10px;
+            transition: width 0.1s ease-out;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: var(--radius);
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--bar-bg);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="loader" class="loading-overlay">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="video-wrapper" id="videoWrapper">
+            <span class="placeholder-text" id="placeholderText">Камера выключена</span>
+            <video id="webcam" autoplay playsinline muted style="display:none;"></video>
+        </div>
+
+        <h1 class="prediction-title" id="className">Неизвестно</h1>
+        <p class="confidence-label">Уверенность: <span id="confidenceValue">0</span>%</p>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <button id="cameraBtn">Включить камеру</button>
+    </div>
+
+    <!-- Настройка импортов для работы с модулями -->
+    <script type="importmap">
+        {
+            "imports": {
+                "@tensorflow/tfjs": "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.es5.min.js",
+                "@teachablemachine/image": "https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/index.min.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as tmImage from "@teachablemachine/image";
+
+        const MODEL_URL = "https://teachablemachine.withgoogle.com/models/9K0vet4R8/";
+        
+        let model, webcam, net;
+        
+        const cameraBtn = document.getElementById("cameraBtn");
+        const video = document.getElementById("webcam");
+        const placeholderText = document.getElementById("placeholderText");
+        const videoWrapper = document.getElementById("videoWrapper");
+        const className = document.getElementById("className");
+        const confidenceValue = document.getElementById("confidenceValue");
+        const progressBar = document.getElementById("progressBar");
+        const loader = document.getElementById("loader");
+
+        // 1. Загрузка модели при старте страницы
+        async function init() {
+            try {
+                const modelURL = MODEL_URL + "model.json";
+                const metadataURL = MODEL_URL + "metadata.json";
+                
+                model = await tmImage.load(modelURL, metadataURL);
+                net = model.net;
+                
+                // Скрываем лоадер после загрузки модели
+                loader.classList.add("hidden");
+            } catch (error) {
+                console.error("Ошибка загрузки модели:", error);
+                loader.innerHTML = "<p style='color:#ef4444'>Ошибка загрузки модели</p>";
+            }
+        }
+
+        // 2. Функция запуска камеры
+        async function setupCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Ваш браузер не поддерживает доступ к веб-камере.");
+                return false;
+            }
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user" }, 
+                audio: false
+            });
+            
+            video.srcObject = stream;
+            
+            return new Promise((resolve) => {
+                video.onloadedmetadata = () => {
+                    resolve(video);
+                };
+            });
+        }
+
+        // 3. Цикл предсказаний
+        async function predict() {
+            if (!net) return;
+
+            try {
+                const prediction = await model.predict(video);
+                
+                // Находим класс с максимальной вероятностью
+                let maxIndex = 0;
+                let maxValue = prediction[0].probability;
+
+                for (let i = 1; i < prediction.length; i++) {
+                    if (prediction[i].probability > maxValue) {
+                        maxIndex = i;
+                        maxValue = prediction[i].probability;
+                    }
+                }
+
+                // Обновление UI
+                className.textContent = prediction[maxIndex].className;
+                const percent = Math.round(maxValue * 100);
+                confidenceValue.textContent = percent;
+                progressBar.style.width = `${percent}%`;
+                
+                requestAnimationFrame(predict);
+            } catch (e) {
+                // Игнорируем ошибки если видео еще не готово или прервано
+            }
+        }
+
+        // 4. Обработчик кнопки
+        cameraBtn.addEventListener("click", async () => {
+            cameraBtn.disabled = true;
+            cameraBtn.textContent = "Запуск...";
+            
+            try {
+                await setupCamera();
+                video.style.display = "block";
+                placeholderText.style.display = "none";
+                videoWrapper.classList.add("active");
+                
+                cameraBtn.textContent = "Камера активна";
+                cameraBtn.style.backgroundColor = "#10b981"; // Green for active
+                cameraBtn.disabled = false;
+                
+                // Запускаем цикл нейросети
+                predict();
+            } catch (error) {
+                console.error(error);
+                alert("Не удалось получить доступ к камере. Проверьте разрешения браузера.");
+                cameraBtn.disabled = false;
+                cameraBtn.textContent = "Включить камеру";
+            }
+        });
+
+        // Инициализация при загрузке
+        init();
+    </script>
+</body>
+</html>
