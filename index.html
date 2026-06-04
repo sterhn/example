@@ -3,312 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Классификатор</title>
+    <title>AI Model Viewer</title>
+    
+    <!-- Подключаем шрифт Inter для современного вида -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-color: #6366f1; /* Indigo */
-            --accent-hover: #4f46e5;
-            --bar-bg: #334155;
-            --radius: 20px;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            /* Красивый градиентный фон */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
             min-height: 100vh;
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
         }
 
-        .container {
-            background-color: var(--card-bg);
-            padding: 2rem;
-            border-radius: var(--radius);
+        /* Контейнер приложения (Карточка) */
+        .app-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            font-weight: 800;
+            margin-bottom: 30px;
             text-align: center;
-            max-width: 90%;
-            width: 400px;
-            position: relative;
-        }
-
-        .video-wrapper {
-            width: 100%;
-            aspect-ratio: 4 / 3;
-            background: #000;
-            border-radius: calc(var(--radius) / 1.5);
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid transparent;
-            transition: border-color 0.3s ease;
-        }
-
-        .video-wrapper.active {
-            border-color: var(--accent-color);
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1); /* Зеркальное отображение для удобства пользователя */
-        }
-
-        .placeholder-text {
-            position: absolute;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        h1.prediction-title {
             font-size: 1.8rem;
-            margin: 0 0 0.5rem 0;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            min-height: 2.5rem;
-            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        p.confidence-label {
-            margin: 0 0 1rem 0;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .progress-container {
-            width: 100%;
-            height: 12px;
-            background-color: var(--bar-bg);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--accent-color), #818cf8);
-            border-radius: 10px;
-            transition: width 0.1s ease-out;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
-        }
-
-        button {
-            background-color: var(--accent-color);
-            color: white;
+        /* Стили кнопки */
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
             border: none;
-            padding: 0.8rem 2rem;
-            font-size: 1rem;
-            font-weight: 600;
             border-radius: 12px;
+            padding: 16px 48px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            margin-bottom: 30px;
+            outline: none;
         }
 
-        button:hover {
-            background-color: var(--accent-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        .start-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
         }
 
-        button:active {
-            transform: translateY(0);
+        .start-btn:active {
+            transform: translateY(1px);
         }
 
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .loading-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.8);
+        /* Обертка для видео (скрывает острые углы канваса) */
+        .video-wrapper {
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            width: 200px; /* Фиксируем размер контейнера под скрипт */
+            height: 200px;
+            background: #000;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: var(--radius);
-            z-index: 10;
-            backdrop-filter: blur(4px);
+            margin-bottom: 30px;
         }
 
-        .spinner {
-            width: 30px;
-            height: 30px;
-            border: 3px solid var(--bar-bg);
-            border-top-color: var(--accent-color);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        /* Стили для результатов */
+        #label-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        /* Стилизация динамически добавляемых div внутри label-container */
+        #label-container div {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #cbd5e1;
+            border-left: 4px solid var(--accent-color);
+            text-align: center;
         }
+        
+        /* Если нужно сделать текст еще крупнее, можно раскомментировать следующее:
+        #label-container div span {
+            font-size: 1.5em;
+            color: #fff;
+        } */
 
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div id="loader" class="loading-overlay">
-            <div class="spinner"></div>
-        </div>
-
-        <div class="video-wrapper" id="videoWrapper">
-            <span class="placeholder-text" id="placeholderText">Камера выключена</span>
-            <video id="webcam" autoplay playsinline muted style="display:none;"></video>
-        </div>
-
-        <h1 class="prediction-title" id="className">Неизвестно</h1>
-        <p class="confidence-label">Уверенность: <span id="confidenceValue">0</span>%</p>
-        
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
-
-        <button id="cameraBtn">Включить камеру</button>
+<div class="app-container">
+    <h1>Machine Learning Vision</h1>
+    
+    <button type="button" onclick="init()" class="start-btn">Start System</button>
+    
+    <div class="video-wrapper">
+        <div id="webcam-container"></div>
     </div>
+    
+    <div id="label-container"></div>
+</div>
 
-    <!-- Настройка импортов для работы с модулями -->
-    <script type="importmap">
-        {
-            "imports": {
-                "@tensorflow/tfjs": "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.es5.min.js",
-                "@teachablemachine/image": "https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/index.min.js"
-            }
-        }
-    </script>
+<!-- Библиотеки (как в оригинале) -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
-    <script type="module">
-        import * as tmImage from "@teachablemachine/image";
+<script type="text/javascript">
+    // More API functions here:
+    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
 
-        const MODEL_URL = "https://teachablemachine.withgoogle.com/models/9K0vet4R8/";
-        
-        let model, webcam, net;
-        
-        const cameraBtn = document.getElementById("cameraBtn");
-        const video = document.getElementById("webcam");
-        const placeholderText = document.getElementById("placeholderText");
-        const videoWrapper = document.getElementById("videoWrapper");
-        const className = document.getElementById("className");
-        const confidenceValue = document.getElementById("confidenceValue");
-        const progressBar = document.getElementById("progressBar");
-        const loader = document.getElementById("loader");
+    // the link to your model provided by Teachable Machine export panel
+    const URL = "https://teachablemachine.withgoogle.com/models/es-9w7uTa/";
 
-        // 1. Загрузка модели при старте страницы
-        async function init() {
-            try {
-                const modelURL = MODEL_URL + "model.json";
-                const metadataURL = MODEL_URL + "metadata.json";
-                
-                model = await tmImage.load(modelURL, metadataURL);
-                net = model.net;
-                
-                // Скрываем лоадер после загрузки модели
-                loader.classList.add("hidden");
-            } catch (error) {
-                console.error("Ошибка загрузки модели:", error);
-                loader.innerHTML = "<p style='color:#ef4444'>Ошибка загрузки модели</p>";
-            }
-        }
+    let model, webcam, labelContainer, maxPredictions;
 
-        // 2. Функция запуска камеры
-        async function setupCamera() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert("Ваш браузер не поддерживает доступ к веб-камере.");
-                return false;
-            }
+    // Load the image model and setup the webcam
+    async function init() {
+        const btn = document.querySelector('.start-btn');
+        btn.style.opacity = "0.5";
+        btn.textContent = "Loading AI...";
 
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "user" }, 
-                audio: false
-            });
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        // load the model and metadata
+        try {
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            // Convenience function to setup a webcam
+            const flip = true; // whether to flip the webcam
+            webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
             
-            video.srcObject = stream;
+            // Небольшая задержка, чтобы интерфейс успел обновиться
+            await new Promise(resolve => setTimeout(resolve, 100));
             
-            return new Promise((resolve) => {
-                video.onloadedmetadata = () => {
-                    resolve(video);
-                };
-            });
-        }
+            await webcam.setup(); // request access to the webcam
+            await webcam.play();
+            window.requestAnimationFrame(loop);
 
-        // 3. Цикл предсказаний
-        async function predict() {
-            if (!net) return;
-
-            try {
-                const prediction = await model.predict(video);
-                
-                // Находим класс с максимальной вероятностью
-                let maxIndex = 0;
-                let maxValue = prediction[0].probability;
-
-                for (let i = 1; i < prediction.length; i++) {
-                    if (prediction[i].probability > maxValue) {
-                        maxIndex = i;
-                        maxValue = prediction[i].probability;
-                    }
-                }
-
-                // Обновление UI
-                className.textContent = prediction[maxIndex].className;
-                const percent = Math.round(maxValue * 100);
-                confidenceValue.textContent = percent;
-                progressBar.style.width = `${percent}%`;
-                
-                requestAnimationFrame(predict);
-            } catch (e) {
-                // Игнорируем ошибки если видео еще не готово или прервано
+            // append elements to the DOM
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) { // and class labels
+                labelContainer.appendChild(document.createElement("div"));
             }
-        }
-
-        // 4. Обработчик кнопки
-        cameraBtn.addEventListener("click", async () => {
-            cameraBtn.disabled = true;
-            cameraBtn.textContent = "Запуск...";
             
-            try {
-                await setupCamera();
-                video.style.display = "block";
-                placeholderText.style.display = "none";
-                videoWrapper.classList.add("active");
-                
-                cameraBtn.textContent = "Камера активна";
-                cameraBtn.style.backgroundColor = "#10b981"; // Green for active
-                cameraBtn.disabled = false;
-                
-                // Запускаем цикл нейросети
-                predict();
-            } catch (error) {
-                console.error(error);
-                alert("Не удалось получить доступ к камере. Проверьте разрешения браузера.");
-                cameraBtn.disabled = false;
-                cameraBtn.textContent = "Включить камеру";
-            }
-        });
+            btn.textContent = "System Active";
+            btn.style.background = "#10b981"; // Зеленый цвет активности
+        } catch (error) {
+            console.error(error);
+            btn.textContent = "Error Loading";
+        }
+    }
 
-        // Инициализация при загрузке
-        init();
-    </script>
+    async function loop() {
+        webcam.update(); // update the webcam frame
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    // run the webcam image through the image model
+    async function predict() {
+        // predict can take in an image, video or canvas html element
+        const prediction = await model.predict(webcam.canvas);
+        for (let i = 0; i < maxPredictions; i++) {
+            const classPrediction =
+                prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(0) + "%";
+            labelContainer.childNodes[i].innerHTML = classPrediction;
+            
+            // Визуальное выделение самой вероятной категории
+            labelContainer.childNodes[i].style.borderLeftWidth = prediction[i].probability > 0.8 ? "6px" : "4px";
+            labelContainer.childNodes[i].style.color = prediction[i].probability > 0.8 ? "#fff" : "#cbd5e1";
+        }
+    }
+</script>
+
 </body>
 </html>
